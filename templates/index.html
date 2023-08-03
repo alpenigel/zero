@@ -1,0 +1,84 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero</title>
+    <!-- Link the external CSS file -->
+    <link rel="stylesheet" href="{{ url_for('serve_static', filename='css/styles.css') }}">
+    <!-- Add the favicon link -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+</head>
+<body>
+    <header>
+        <h1>Zero</h1>
+    </header>
+    <main>
+        <div class="upload-form">
+            <h2>Upload an Image with Description:</h2>
+            <form action="/" method="post" enctype="multipart/form-data">
+                <input type="file" name="image" accept="image/*" required>
+                <br>
+                <textarea name="description" rows="4" placeholder="Enter description..." required></textarea>
+                <br>
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+
+        <h2>Stored Entries:</h2>
+        {% for entry in entries %}
+        <div class="entry">
+            <a href="{{ entry[1] }}" target="_blank"> <!-- Add anchor tag around the image -->
+                <img src="{{ entry[1] }}" alt="{{ entry[2] }}">
+            </a>
+            <p>{{ entry[2] }}</p>
+        </div>
+        {% endfor %}
+    </main>
+
+    <!-- Modal HTML -->
+    <div class="modal">
+        <img id="modal-image" src="" alt="">
+    </div>
+
+
+    <!-- JavaScript to handle the modal -->
+    <script>
+        const images = document.querySelectorAll('.entry img');
+        const modal = document.querySelector('.modal');
+        const modalImage = document.getElementById('modal-image');
+
+        let currentIndex = 0;
+
+        images.forEach((image, index) => {
+            image.addEventListener('click', () => {
+                event.preventDefault(); // Prevent the default behavior of opening the image in a new tab
+                currentIndex = index;
+                modalImage.src = image.src;
+                modal.classList.add('active');
+            });
+        });
+
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        modal.addEventListener('click', closeModal);
+
+        document.addEventListener('keydown', (event) => {
+            if (modal.classList.contains('active')) {
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+                    currentIndex = (currentIndex - 1 + images.length) % images.length;
+                } else if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+                    currentIndex = (currentIndex + 1) % images.length;
+                } else if (event.key === 'Escape') {
+                    closeModal();
+                }
+
+                modalImage.src = images[currentIndex].src;
+            }
+        });
+    </script>
+</body>
+</html>
